@@ -6,20 +6,23 @@ from users.serializers import CustomUserSerializer
 
 IN_FAVORITE_MESSAGE = 'Этот рецепт уже в избранном! = )'
 IN_SHOPPING_LIST_MESSAGE = 'Этот рецепт уже в вашем списке покупок! = )'
+COOKING_TIME_MESSAGE = 'Время приготовления не может быть меньше 1-ой минуты!'
+INGREDIENT_AMOUNT_MESSAGE = 'Ингредиента не может быть меньше 0!'
+UNIQUE_INGREDIENT_MESSAGE = 'Ингредиенты не могут повторяться!'
 
 
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('name', 'color', 'slug')
+        fields = ('id', 'name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('name', 'measurement_unit')
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class QuantitytSerializer(serializers.ModelSerializer):
@@ -31,12 +34,12 @@ class QuantitytSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quantity
-        fields = ('name', 'measurement_unit', 'amount')
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    ingredient = QuantitytSerializer(
-        source='ingredient_amount',
+    ingredients = QuantitytSerializer(
+        source='ingredient_in_recipe',
         many=True
         )
     tags = TagSerializer(many=True)
@@ -48,11 +51,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
+            'id',
             'author',
             'name',
             'image',
             'text',
-            'ingredient',
+            'ingredients',
             'tags',
             'cooking_time',
             'pub_date',
@@ -104,8 +108,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate_cooking_time(self, data):
         if data < 1:
-            raise serializers.ValidationError(
-                'Время приготовления не может быть меньше 1-ой минуты!')
+            raise serializers.ValidationError(COOKING_TIME_MESSAGE)
         return data
 
     def validate_ingredients(self, data):
@@ -113,11 +116,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         unique_ingredients = set()
         for ingredient in ingredients:
             if float(ingredient['amount']) < float(0.1):
-                raise serializers.ValidationError(
-                    'Ингредиента не может быть меньше 0!')
+                raise serializers.ValidationError(INGREDIENT_AMOUNT_MESSAGE)
             if ingredient['id'] in unique_ingredients:
-                raise serializers.ValidationError(
-                    'Ингредиенты не могут повторяться')
+                raise serializers.ValidationError(UNIQUE_INGREDIENT_MESSAGE)
             unique_ingredients.add(ingredient['name'])
         return data
 
