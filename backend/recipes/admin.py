@@ -6,15 +6,6 @@ from recipes.models import (Favorite, Ingredient, Quantity, Recipe,
 admin.ModelAdmin.empty_value_display = EMPTY_STRING
 
 
-class QuantityInLine(admin.TabularInline):
-    model = Quantity
-    fk_name = 'recipe'
-
-
-class TagInline(admin.TabularInline):
-    model = Recipe.tags.through
-
-
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
@@ -40,15 +31,15 @@ class QuantityAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'image', 'text', 'cooking_time', 'author', )
-    list_filter = ('name', 'cooking_time', 'author', )
-    search_fields = ('name', 'author', )
-    exclude = ('ingredient', 'tags, ')
-
-    inlines = [
-        QuantityInLine,
-        TagInline
-    ]
+    list_display = (
+        'pk',
+        'text',
+        'author',
+        'ingredient',
+        'name',
+        'favorite_count'
+        )
+    list_filter = ('author', 'name', 'tag')
 
     def favorite_count(self, obj):
         return Favorite.objects.filter(recipe=obj).count()

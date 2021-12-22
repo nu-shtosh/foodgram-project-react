@@ -22,7 +22,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ('name', 'measurement_unit')
 
 
 class QuantitytSerializer(serializers.ModelSerializer):
