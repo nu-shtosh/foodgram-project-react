@@ -4,7 +4,7 @@ from django_filters import rest_framework as filters
 from foodgram.filters import IngredientFilter, RecipeFilter
 from foodgram.paginations import CustomPageNumberPaginator
 from foodgram.permissions import IsAuthorOrReadOnly, IsAdmin
-from recipes.models import (Favorite, Ingredient, Quantity, Recipe,
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingList, Tag)
 from recipes.serializers import (FavoriteSerializer, IngredientSerializer,
                                  RecipeSerializer, ShoppingListSerializer,
@@ -45,11 +45,6 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return RecipeSerializer
-        return RecipeSerializer
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -60,7 +55,7 @@ class RecipeViewSet(ModelViewSet):
         )
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id).id
-        user = self.request.user.id
+        user = request.user.id
         in_favorite = Favorite.objects.filter(
             user=user,
             recipe=recipe
@@ -121,7 +116,7 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
         )
     def download_shopping_list(self, request):
-        ingredients = Quantity.objects.filter(
+        ingredients = IngredientInRecipe.objects.filter(
             recipe__shop_cart__user=request.user).values_list(
                 'ingredient__name',
                 'amount',

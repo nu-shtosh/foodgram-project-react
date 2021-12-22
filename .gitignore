@@ -130,3 +130,9 @@ dmypy.json
 
 # .idea
 .idea
+
+#myignore
+static/
+venv/
+.env
+media/

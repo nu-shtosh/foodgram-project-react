@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Quantity',
+            name='IngredientInRecipe',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.PositiveSmallIntegerField(default=0.0, verbose_name='Количество')),
