@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from foodgram.settings import EMPTY_STRING
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingList, Tag)
@@ -29,20 +30,18 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(IngredientInRecipe)
-class IngredientInRecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe', 'ingredient', 'amount')
-
-
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
+        'name',
         'text',
         'author',
-        'name',
-        'favorite_count'
+        'favorite_count',
+        'cooking_time',
+        'tags'
         )
+    list_display = ('name', 'author',)
     list_filter = ('author', 'name', 'tags')
     exclude = ('ingredients',)
     inlines = [

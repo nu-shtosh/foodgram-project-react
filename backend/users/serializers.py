@@ -1,7 +1,8 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Recipe
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
+from recipes.models import Recipe
 from users.models import CustomUser, Follow
 
 FOLLOW_YOURSELF_ERROR_MESSAGE = 'Нельзя подписаться на себя! =)'

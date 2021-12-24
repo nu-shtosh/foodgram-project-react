@@ -1,13 +1,15 @@
-from django_filters import rest_framework as filters
-from recipes.models import Recipe
+from django_filters import (AllValuesMultipleFilter, BooleanFilter, CharFilter,
+                            FilterSet, ModelChoiceFilter)
+
+from recipes.models import Ingredient, Recipe
 from users.models import CustomUser
 
 
-class RecipeFilter(filters.FilterSet):
-    author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
-    tags = filters.AllValuesMultipleFilter(field_name='tag__slug')
-    is_favorited = filters.BooleanFilter(method='filter_is_favorite')
-    is_in_shopping_cart = filters.BooleanFilter(
+class RecipeFilter(FilterSet):
+    author = ModelChoiceFilter(queryset=CustomUser.objects.all())
+    tags = AllValuesMultipleFilter(field_name='tag__slug')
+    is_favorited = BooleanFilter(method='filter_is_favorite')
+    is_in_shopping_cart = BooleanFilter(
         method='filter_is_in_shopping_cart')
 
     class Meta:
@@ -25,5 +27,9 @@ class RecipeFilter(filters.FilterSet):
         return Recipe.objects.all()
 
 
-class IngredientFilter(filters.FilterSet):
-    search_param = 'name'
+class IngredientFilter(FilterSet):
+    name = CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Ingredient
+        search_param = 'name'

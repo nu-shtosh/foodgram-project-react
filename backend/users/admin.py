@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from foodgram.settings import EMPTY_STRING
 from users.models import CustomUser, Follow
 

@@ -1,10 +1,11 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from foodgram.paginations import CustomPageNumberPaginator
-from foodgram.permissions import IsAdmin
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from foodgram.paginations import CustomPageNumberPaginator
+from foodgram.permissions import IsAdmin
 from users.models import CustomUser, Follow
 from users.serializers import CustomUserSerializer, FollowSerializer
 

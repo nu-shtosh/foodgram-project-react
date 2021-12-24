@@ -1,18 +1,19 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from foodgram.filters import IngredientFilter, RecipeFilter
-from foodgram.paginations import CustomPageNumberPaginator
-from foodgram.permissions import IsAuthorOrReadOnly, IsAdmin
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingList, Tag)
-from recipes.serializers import (FavoriteSerializer, IngredientSerializer,
-                                 RecipeSerializer, ShoppingListSerializer,
-                                 TagSerializer)
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+
+from foodgram.filters import IngredientFilter, RecipeFilter
+from foodgram.paginations import CustomPageNumberPaginator
+from foodgram.permissions import IsAuthorOrReadOnly
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingList, Tag
+from recipes.serializers import (FavoriteSerializer, IngredientSerializer,
+                                 RecipeGetSerializer, RecipeSerializer,
+                                 ShoppingListSerializer, TagSerializer)
 
 IN_FAVORITE_MESSAGE = 'Вы добавили рецепт в избранное! =)'
 NOT_IN_FAVORITE_MESSAGE = 'Вы убрали рецепт из избранного! =('
@@ -22,30 +23,45 @@ NOT_IN_SHOPPING_LIST_MESSAGE = 'Вы убрали рецепт из список
 
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
-    filter_backends = (filters.DjangoFilterBackend,)
     serializer_class = TagSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
 
 class IngredientViewSet(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
+    pagination_class = None
 
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorOrReadOnly
-        ]
+    permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
     pagination_class = CustomPageNumberPaginator
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        if self.request.query_params.get('is_favorited'):
+            queryset = queryset.filter(favorite__user=self.request.user)
+        if self.request.query_params.get('is_in_shopping_cart'):
+            queryset = queryset.filter(cart__customer=self.request.user)
+        return queryset
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeGetSerializer
+        return RecipeSerializer
+
     def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(
@@ -116,34 +132,15 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
         )
     def download_shopping_list(self, request):
-        ingredients = IngredientInRecipe.objects.filter(
-            recipe__shop_cart__user=request.user).values_list(
-                'ingredient__name',
-                'amount',
-                'ingredient__measurement_unit')
-
-        ingredients_count = {}
-        for ingredient in ingredients:
-            name = ingredient[0]
-            amount = ingredient[1]
-            measurement = ingredient[2]
-
-            if name not in ingredients_count:
-                ingredients_count[name] = {
-                    'amount': amount,
-                    'measurement': measurement}
-            else:
-                ingredients_count[name]['amount'] += amount
-
-        result = ''
-        for name, values in ingredients_count.items():
-            result += (f'{name} - {values["amount"]} '
-                       f'{values["measurement"]}. ')
-
-        download = 'buy_list.txt'
-        response = HttpResponse(
-            result, content_type='text/plain,charset=utf8')
-        response['Content-Disposition'] = (
-            'attachment; filename={0}'.format(download)
-        )
+        user = request.user
+        in_cart = Recipe.objects.filter(cart__customer=user)
+        queryset = in_cart.values_list(
+            'ingredients__name',
+            'related_ingredients__amount',
+            'ingredients__measurement_unit')
+        text = 'Ваш список покупок: \n'
+        for ingredient in queryset:
+            text += f'{str(ingredient)} \n'
+        response = HttpResponse(text, 'Content-Type: application/txt')
+        response['Content-Disposition'] = 'attachment; filename="wishlist"'
         return response

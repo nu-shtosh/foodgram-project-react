@@ -1,15 +1,16 @@
 import csv
 import os
+
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodgram.settings')
 django.setup()
 
-from recipes.models import Ingredient
-
 
 def from_csv():
     with open('ingredients.csv', encoding='utf-8') as i:
+        from recipes.models import Ingredient
+
         reader = csv.reader(i)
         for row in reader:
             name, measurement_unit = row
