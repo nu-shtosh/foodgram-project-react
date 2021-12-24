@@ -103,12 +103,12 @@ class RecipeViewSet(ModelViewSet):
             serializer.save()
             return Response(
                 serializer.data,
-                {'status': 'Вы добавили рецепт в список покупок! =)'},
+                {'status': IN_SHOPPING_LIST_MESSAGE},
                 status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE' and in_shopping_list:
             ShoppingList.objects.get(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'status': 'Этого рецепта нет в списке покупок!'},
+        return Response({'status': NOT_IN_SHOPPING_LIST_MESSAGE},
                         status=status.HTTP_400_BAD_REQUEST)
 
     @action(

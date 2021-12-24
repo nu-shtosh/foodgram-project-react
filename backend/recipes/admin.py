@@ -43,7 +43,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'favorite_count'
         )
-    list_filter = ('author', 'name', 'tag')
+    list_filter = ('author', 'name', 'tags')
     exclude = ('ingredients',)
     inlines = [
         IngredientInRecipeInLine,

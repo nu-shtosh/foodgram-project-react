@@ -1,5 +1,4 @@
 from drf_extra_fields.fields import Base64ImageField
-from django.shortcuts import get_object_or_404
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingList, Tag)
 from rest_framework import serializers
@@ -102,37 +101,30 @@ class RecipeSerializer(serializers.ModelSerializer):
             unique_ingredients.add(ingredient['name'])
         return data
 
-    def get_ingredients_amount(self, ingredients, recipe):
-        tags = self.initial_data.get('tags')
-        for tag_id in tags:
-            recipe.tags.add(get_object_or_404(Tag, pk=tag_id))
-        for ingredient in ingredients:
-            ingredients_amount = IngredientInRecipe.objects.create(
-                recipe=recipe,
+    def create_ingredient_in_recipe(self, ingredient, recipe):
+        for ingredient in ingredient:
+            IngredientInRecipe.objects.create(
                 ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount')
+                recipe=recipe,
+                amount=ingredient.get('amount'),
             )
-            ingredients_amount.save()
 
     def create(self, validated_data):
-        image = validated_data.pop('image')
-        ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(image=image, **validated_data)
-        self.get_ingredients_amount(ingredients, recipe)
+        ingredients = validated_data.get('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.create_ingredient_in_recipe(ingredients, recipe)
         return recipe
 
-    def update(self, instance, validated_data):
-        instance.tags.clear()
+    def update(self, request, validated_data):
+        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        IngredientInRecipe.objects.filter(recipe=instance).delete()
-        self.get_ingredients_amount(ingredients, instance)
-        if validated_data.get('image') is not None:
-            instance.image = validated_data.get('image')
-        instance.name = validated_data.get('name')
-        instance.text = validated_data.get('text')
-        instance.cooking_time = validated_data.get('cooking_time')
-        instance.save()
-        return instance
+        recipe = Recipe.objects.get(id=request.id)
+        recipe.ingredients.clear()
+        recipe.tags.set(tags)
+        self.create_ingredient_in_recipe(recipe, ingredients)
+        return super().update(recipe, validated_data)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
