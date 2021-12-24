@@ -132,6 +132,7 @@ dmypy.json
 .idea
 
 #myignore
+
 static/
 venv/
 .env
