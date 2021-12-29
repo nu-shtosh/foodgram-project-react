@@ -1,7 +1,7 @@
 from colorfield import fields
 from django.db import models
 
-from users.models import CustomUser
+from users.models import User
 
 
 class Tag(models.Model):
@@ -56,7 +56,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Класс рецепта."""
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Автор',
         help_text='Имя автора',
@@ -81,11 +81,13 @@ class Recipe(models.Model):
         Ingredient,
         through='IngredientInRecipe',
         verbose_name='Ингредиенты',
+        related_name='recipes',
         help_text='Впиши ингредиенты',
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег',
+        related_name='recipes',
         help_text='Добавь теги',
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -104,40 +106,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.name}'
-
-
-class Favorite(models.Model):
-    """Класс избранного рецепта/автора."""
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Избранный рецепт'
-    )
-    author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Избранный автор'
-    )
-    add_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата добовления'
-    )
-
-    class Meta:
-        ordering = ('add_date',)
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранное'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('author', 'recipe'),
-                name='unique_favorites'
-            ),
-        )
-
-    def __str__(self):
-        return f'({self.recipe}, {self.author})'
 
 
 class IngredientInRecipe(models.Model):
@@ -173,10 +141,44 @@ class IngredientInRecipe(models.Model):
         return f'{self.ingredient}'
 
 
+class Favorite(models.Model):
+    """Класс избранного рецепта/автора."""
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Избранный рецепт'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Избранный автор'
+    )
+    add_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добовления'
+    )
+
+    class Meta:
+        ordering = ('add_date',)
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_favorites'
+            ),
+        )
+
+    def __str__(self):
+        return f'({self.recipe}, {self.user})'
+
+
 class ShoppingList(models.Model):
     """Класс список покупок"""
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='shopping_list'

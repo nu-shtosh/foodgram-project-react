@@ -1,10 +1,8 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserSerializer
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
-
 from recipes.models import Recipe
-from users.models import CustomUser, Follow
-
+from users.models import Follow, User
+from drf_extra_fields.fields import Base64ImageField
 FOLLOW_YOURSELF_ERROR_MESSAGE = 'Нельзя подписаться на себя! =)'
 FOLLOW_ERROR_MESSAGE = 'Вы уже подписаны на этого автора! =)'
 EMAIL_ERROR_MESSAGE = 'Такой адрес электронной почты уже зарегистрирован! =)'
@@ -12,10 +10,11 @@ USERNAME_ERROR_MESSAGE = 'Такой логин уже зарегистриро�
 
 
 class CustomUserSerializer(UserSerializer):
+    """User GET."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             'id',
             'email',
@@ -30,43 +29,44 @@ class CustomUserSerializer(UserSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        queryset = Follow.objects.filter(
-            author=obj.id,
-            follower=request.user.id
-            ).exists()
-        return queryset
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-    email = serializers.EmailField(validators=[UniqueValidator(
-        queryset=CustomUser.objects.all(),
-        message=EMAIL_ERROR_MESSAGE)]
-        )
-    username = serializers.CharField(validators=[UniqueValidator(
-        queryset=CustomUser.objects.all(),
-        message=USERNAME_ERROR_MESSAGE)]
-        )
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password'
-            )
+        return Follow.objects.filter(user=request.user, author=obj.id).exists()
 
 
 class RecipeInFollowSerializer(serializers.ModelSerializer):
+    """Рецепт для вывода в Follow."""
+    image = Base64ImageField(max_length=None, use_url=True)
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    email = serializers.ReadOnlyField(source='author.email')
+class FollowPostSerializer(serializers.ModelSerializer):
+    """Follow POST."""
+    queryset = User.objects.all()
+    user = serializers.PrimaryKeyRelatedField(queryset=queryset)
+    author = serializers.PrimaryKeyRelatedField(queryset=queryset)
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+
+    def validate(self, data):
+        """Валидация  подписки."""
+        if data['author'] == data['user']:
+            raise serializers.ValidationError(FOLLOW_YOURSELF_ERROR_MESSAGE)
+        if Follow.objects.filter(
+            author=data['author'],
+            user=data['user']
+        ).exists():
+            raise serializers.ValidationError(FOLLOW_ERROR_MESSAGE)
+        return data
+
+
+class FollowGetSerializer(serializers.ModelSerializer):
+    """Follow GET."""
     id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
@@ -76,41 +76,39 @@ class FollowSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Follow
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count', 'author',
-                  'follower')
-        extra_kwargs = {'author': {'write_only': True},
-                        'follower': {'write_only': True}}
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+            )
 
     def get_is_subscribed(self, obj):
         """Статус подписки."""
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
+        if not request or request.user.is_anonymous:
             return False
-        queryset = Follow.objects.filter(
-            author=obj.id,
-            follower=request.user.id).exists()
-        return queryset
+        return Follow.objects.filter(
+            user=obj.user, author=obj.author
+        ).exists()
 
     def get_recipes(self, obj):
         """Рецепты на странице подписок."""
-        queryset = Recipe.objects.filter(author=obj.author.id)
-        serializer = RecipeInFollowSerializer(queryset, many=True)
-        return serializer.data
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj.author)
+        if limit is not None:
+            queryset = Recipe.objects.filter(
+                author=obj.author
+            )[:int(limit)]
+        return RecipeInFollowSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         """Количество рецептов."""
         queryset = Recipe.objects.filter(author=obj.author.id).count()
         return queryset
-
-    def validate(self, data):
-        """Валидация  подписки."""
-        if data['author'] == data['follower']:
-            raise serializers.ValidationError(FOLLOW_YOURSELF_ERROR_MESSAGE)
-        if Follow.objects.filter(
-            author=data['author'],
-            follower=data['follower']
-        ).exists():
-            raise serializers.ValidationError(FOLLOW_ERROR_MESSAGE)
-        return data
