@@ -1,8 +1,10 @@
 from djoser.serializers import UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+
 from recipes.models import Recipe
 from users.models import Follow, User
-from drf_extra_fields.fields import Base64ImageField
+
 FOLLOW_YOURSELF_ERROR_MESSAGE = 'Нельзя подписаться на себя! =)'
 FOLLOW_ERROR_MESSAGE = 'Вы уже подписаны на этого автора! =)'
 EMAIL_ERROR_MESSAGE = 'Такой адрес электронной почты уже зарегистрирован! =)'

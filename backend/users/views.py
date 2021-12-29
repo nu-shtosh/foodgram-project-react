@@ -3,8 +3,9 @@ from djoser.views import UserViewSet
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from foodgram.permissions import AuthorOrAdminOrRead
+
 from foodgram.paginations import CustomPageNumberPaginator
+from foodgram.permissions import AuthorOrAdminOrRead
 from users.models import Follow, User
 from users.serializers import (CustomUserSerializer, FollowGetSerializer,
                                FollowPostSerializer)

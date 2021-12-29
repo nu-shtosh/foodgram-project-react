@@ -6,14 +6,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from foodgram.permissions import AuthorOrAdminOrRead
-from foodgram.filters import RecipeFilter, IngredientFilter
+
+from foodgram.filters import IngredientFilter, RecipeFilter
 from foodgram.mixins import MixinsSet
 from foodgram.paginations import CustomPageNumberPaginator
-from recipes.models import Favorite, Ingredient, Recipe, ShoppingList, Tag
+from foodgram.permissions import AuthorOrAdminOrRead
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingList, Tag)
 from recipes.serializers import (FavoriteSerializer, IngredientSerializer,
-                                 RecipeSerializer,
-                                 ShoppingListSerializer, TagSerializer)
+                                 RecipeSerializer, ShoppingListSerializer,
+                                 TagSerializer)
 
 
 class TagViewSet(MixinsSet):
@@ -98,19 +100,32 @@ class RecipeViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=True,
-        permission_classes=[IsAuthenticated]
+        detail=False,
+        methods=['GET'],
+        permission_classes=[AuthorOrAdminOrRead]
         )
-    def download_shopping_list(self, request):
+    def download_shopping_cart(self, request):
         user = request.user
-        shoppinglist = Recipe.objects.filter(recipe__shoppinglist__user=user)
-        queryset = shoppinglist.values_list(
-            'ingredients__name',
-            'ingredients__amount',
-            'ingredients__measurement_unit')
+        queryset = IngredientInRecipe.objects.filter(
+            recipe__shopping_list__user=user
+            )
+        ingredients = queryset.values_list(
+            'recipe__ingredients_amount__ingredient__name',
+            'recipe__ingredients_amount__ingredient__measurement_unit',
+            'recipe__ingredients_amount__amount'
+        )
         text = 'Список покупок: \n'
-        for ingredient in queryset:
-            text += f'{str(ingredient)} \n'
-        response = HttpResponse(text, 'Content-Type: application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="Покупки"'
+        shoplist = {}
+        for ingredients in ingredients:
+            name, measurement_unit, amount = ingredients
+            if name not in shoplist:
+                shoplist[name] = {
+                    'measurement_unit': measurement_unit,
+                    'amount': amount
+                }
+            else:
+                shoplist[name]['amount'] += amount
+        text += f'{str(shoplist)}'
+        response = HttpResponse(text, 'Content-Type: text/plane')
+        response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
         return response

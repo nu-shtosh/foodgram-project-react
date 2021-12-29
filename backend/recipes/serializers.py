@@ -1,6 +1,7 @@
-from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingList, Tag)
 from users.models import User
@@ -175,11 +176,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         recipe_id = data['recipe'].id
-        in_favrites = Favorite.objects.filter(
+        in_favorites = Favorite.objects.filter(
             user=request.user,
             recipe__id=recipe_id
         ).exists()
-        if in_favrites:
+        if in_favorites:
             raise serializers.ValidationError(IN_FAVORITE_MESSAGE)
         return data
 
