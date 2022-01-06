@@ -20,7 +20,7 @@ class Tag(models.Model):
     slug = models.SlugField(
         'Slug',
         unique=True,
-        max_length=150,
+        max_length=50,
         help_text='Нужен уникальный слаг',
     )
 
@@ -34,6 +34,30 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     """Класс ингредиента."""
+    MEASUREMENT_UNIT_CHOICES = (
+        ('веточка', 'веточка'),
+        ('горсть', 'горсть'),
+        ('пучок', 'пучок'),
+        ('кусок', 'кусок'),
+        ('банка', 'банка'),
+        ('упаковка', 'упаковка'),
+        ('батон', 'батон'),
+        ('л', 'л'),
+        ('стакан', 'стакан'),
+        ('долька', 'долька'),
+        ('щепотка', 'щепотка'),
+        ('по вкусу', 'по вкусу'),
+        ('мл', 'мл'),
+        ('г', 'г'),
+        ('кг', 'кг'),
+        ('шт.', 'шт.'),
+        ('ч. л.', 'ч. л.'),
+        ('ст. л.', 'ст. л.'),
+        ('капля', 'капля'),
+        ('бутылка', 'бутылка'),
+        ('зубчик', 'зубчик'),
+    )
+
     name = models.CharField(
         'Название',
         max_length=150,
@@ -42,6 +66,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         'Единицы измерения',
         max_length=150,
+        choices=MEASUREMENT_UNIT_CHOICES,
         help_text='Впиши нужную еденицу измерения',
     )
 
@@ -108,6 +133,23 @@ class Recipe(models.Model):
         return f'{self.name}'
 
 
+class RecipeTags(models.Model):
+    """Теги для рецепта."""
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               verbose_name='Рецепт')
+    tag = models.ForeignKey(Tag,
+                            on_delete=models.CASCADE,
+                            verbose_name='Тег для рецепта')
+
+    class Meta:
+        verbose_name = 'Теги'
+        verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return f'{self.recipe}, {self.tag}'
+
+
 class IngredientInRecipe(models.Model):
     """Класс количества ингредиента в рецепте."""
     recipe = models.ForeignKey(
@@ -132,7 +174,7 @@ class IngredientInRecipe(models.Model):
         verbose_name_plural = 'Ингридиенты в рецепте'
         constraints = (
             models.UniqueConstraint(
-                fields=('recipe', 'ingredient'),
+                fields=('recipe', 'ingredient', ),
                 name='unique_recipe_ingredient'
             ),
         )
@@ -166,7 +208,7 @@ class Favorite(models.Model):
         verbose_name_plural = 'Избранное'
         constraints = (
             models.UniqueConstraint(
-                fields=('user', 'recipe'),
+                fields=('user', 'recipe', ),
                 name='unique_favorites'
             ),
         )
@@ -200,7 +242,7 @@ class ShoppingList(models.Model):
         verbose_name_plural = 'Списки покупок'
         constraints = (
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
+                fields=('user', 'recipe', ),
                 name='unique_shopping_list'
             ),
         )

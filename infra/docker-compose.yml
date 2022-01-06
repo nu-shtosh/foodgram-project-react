@@ -31,8 +31,8 @@ services:
       bash -c "python manage.py makemigrations --noinput
       && python manage.py migrate --noinput
       && python manage.py collectstatic --noinput
-      && python from_csv_tags.py
-      && python from_csv_ingredients.py
+      && python manage.py load_ing
+      && python manage.py load_tags
       && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - static_value:/code/static/
