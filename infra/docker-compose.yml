@@ -16,12 +16,16 @@ services:
       - ./.env
 
   frontend:
-    image: nushtosh/foodgram_frontend:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ./frontend/:/app/result_build/
 
   backend:
-    image: nushtosh/foodgram_backend:latest
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     restart: always
     command: >
       bash -c "python manage.py makemigrations --noinput
