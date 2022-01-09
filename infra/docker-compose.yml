@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ../backend/.env
+      - ./.env
 
   frontend:
     build:
@@ -35,12 +35,12 @@ services:
       && python manage.py load_tags
       && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - static_value:/code/static/
-      - media_value:/code/media/  
+      - static_value:/backend/static/
+      - media_value:/backend/media/  
     depends_on:
       - db
     env_file:
-      - ../backend/.env
+      - ./.env
 
   nginx:
     image: nginx:1.19.3
