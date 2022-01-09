@@ -1,4 +1,4 @@
-name: foodgram
+name: foodgram_workflow.yaml
 
 on: [push]
 
@@ -43,9 +43,9 @@ jobs:
       - name: Push front to Docker Hub
         uses: docker/build-push-action@v2
         with:
-            push: true
-            context: ./frontend/
-            tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+          push: true
+          context: ./frontend/
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
 
 
   deploy:
