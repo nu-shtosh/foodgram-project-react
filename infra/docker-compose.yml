@@ -16,24 +16,19 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: nushtosh/foodgram_frontend
     volumes:
       - ./frontend/:/app/result_build/
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: nushtosh/foodgram_backend
     restart: always
     command: >
       bash -c "python manage.py makemigrations --noinput
       && python manage.py migrate --noinput
       && python manage.py collectstatic --noinput
       && python manage.py load_ing
-      && python manage.py load_tags
-      && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000"
+      && python manage.py load_tags"
     volumes:
       - static_value:/backend/static/
       - media_value:/backend/media/  
@@ -55,5 +50,6 @@ services:
       - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
     depends_on:
+      - db
       - backend
       - frontend
