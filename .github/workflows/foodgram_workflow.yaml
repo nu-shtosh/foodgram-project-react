@@ -1,4 +1,4 @@
-name: foodgram_workflow.yaml
+name: foodgram
 
 on: [push]
 
@@ -39,7 +39,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram
 
 
   deploy:
@@ -55,7 +55,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram
             sudo docker-compose stop
             sudo docker-compose rm backend
             touch .env
