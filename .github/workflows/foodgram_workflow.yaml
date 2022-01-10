@@ -40,12 +40,6 @@ jobs:
           context: ./backend/
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
-      - name: Push front to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: ./frontend/
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
 
 
   deploy:
@@ -61,7 +55,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
