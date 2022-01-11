@@ -63,10 +63,8 @@ jobs:
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_front:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_back:latest
+            sudo systemctl stop nginx
             sudo docker-compose stop
-            sudo docker-compose rm frontend
-            sudo docker-compose rm backend
-            rm .env
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.HOST }} >> .env
@@ -78,6 +76,10 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d
+            sudo docker-compose exec backend python manage.py collectstatic --noinput
+            sudo docker-compose exec backend python manage.py migrate --noinput
+            sudo docker-compose exec backend python manage.py load_ing
+            sudo docker-compose exec backend python manage.py load_tags
 
   send_message:
     runs-on: ubuntu-latest
