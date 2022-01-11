@@ -3,38 +3,26 @@ version: '3.3'
 services:
   db:
     image: postgres:12.4
-    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - ../backend/.env
+      - ./.env
 
 
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: nustosh/foodgram_back
     restart: always
-    command: >
-      bash -c "python manage.py makemigrations --noinput
-      && python manage.py migrate --noinput
-      && python manage.py collectstatic --noinput
-      && python manage.py load_ing
-      && python manage.py load_tags
-      && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - static_value:/code/static
       - media_value:/code/media
     depends_on:
       - db
     env_file:
-      - ../backend/.env
+      - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: nustosh/foodgram_front
     volumes:
       - ../frontend/:/app/result_build
     depends_on:
