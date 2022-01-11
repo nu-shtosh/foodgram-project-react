@@ -11,7 +11,9 @@ services:
 
 
   backend:
-    image: nustosh/foodgram_back
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - static_value:/code/static
@@ -23,7 +25,9 @@ services:
 
   frontend:
     restart: always
-    image: nustosh/foodgram_front
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build
     depends_on:
