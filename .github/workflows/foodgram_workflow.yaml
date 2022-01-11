@@ -39,13 +39,13 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_back
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_back:latest
       - name: Push to front Docker Hub
         uses: docker/build-push-action@v2 
         with:
           context: ./frontend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_front
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_front:latest
 
 
   deploy:
@@ -61,10 +61,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_front
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_back
-            sudo system stop nginx
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_front:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_back:latest
             sudo docker-compose stop
+            sudo docker-compose rm backend
+            rm .env
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.HOST }} >> .env

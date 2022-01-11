@@ -14,12 +14,8 @@ class UserAdmin(admin.ModelAdmin):
         'first_name',
         'last_name',
         'email',
-        'follow_count',
     )
     search_fields = ('username', 'email',)
-
-    def follow_count(obj):
-        return Follow.objects.filter(recipe=obj).count()
 
 
 @admin.register(Follow)

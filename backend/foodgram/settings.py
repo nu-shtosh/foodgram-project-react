@@ -10,13 +10,9 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
 # Секретики
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = False
-ALLOWED_HOSTS = [
-    '*',
-    '84.201.177.196',
-    'localhost',
-    '127.0.0.1',
-]
+DEBUG = os.environ.get('DEBUG') == 'True'
+
+ALLOWED_HOSTS = ['*', '84.201.177.196', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
