@@ -11,7 +11,9 @@ services:
 
 
   backend:
-    image: nushtosh/foodgram_back:latest
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     restart: always
     env_file:
       - ./.env
@@ -23,12 +25,13 @@ services:
 
 
   frontend:
-    image: nushtosh/foodgram_front:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - ../frontend/:/app/result_build
-    depends_on:
-      - backend
+
 
   nginx:
     image: nginx:1.19.3
@@ -42,10 +45,10 @@ services:
       - ../frontend/build:/usr/share/nginx/html
       - ../docs/:/usr/share/nginx/html/api/docs
     depends_on:
+      - backend
       - frontend
 
 volumes:
   postgres_data:
   static_value:
   media_value:
-  result_build:
