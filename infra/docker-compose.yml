@@ -2,7 +2,6 @@ version: '3.3'
 services:
   db:
     image: postgres:12.4
-    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -12,7 +11,6 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    restart: always
     volumes:
       - static_value:/var/html/static/
       - media_value:/var/html/media/
@@ -30,7 +28,6 @@ services:
 
   nginx:
     image: nginx:1.19.3
-    restart: always
     ports:
       - 80:80
     volumes:
