@@ -9,32 +9,40 @@
 ## Что бы поставить этот проект у себя на серевере надо:
 
 ## скопировать этот проект на свой компьютер:
-##### git clone https://github.com/nu-shtosh/foodgram-project-react.git
-##### не забудь создать .env
+```sh
+git clone https://github.com/nu-shtosh/foodgram-project-react.git
+не забудь создать .env
+```
 
 ## войти на свой сервер скопировать docker-compose, nginx, .env:
-##### scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
-##### scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
-##### scp .env <username>@<host>:/home/<username>/.env
-
+```sh
+scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
+scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
+scp .env <username>@<host>:/home/<username>/.env
+```
 ## установать docker: 
-##### sudo apt install docker.io 
-
+```sh
+sudo apt install docker.io 
+``````
 ## уствновить docker-compose:
-##### sudo apt install docker-compose
-
+```sh
+sudo apt install docker-compose
+```
 ## собрать контейнер:
-##### sudo docker-compose up -d --build
-
+```sh
+sudo docker-compose up -d --build
+```
 ## собрать статику и сделать миграции:
-##### sudo docker-compose exec backend python manage.py collectstatic --noinput
-##### sudo docker-compose exec backend python manage.py makemigrations --noinput
-##### sudo docker-compose exec backend python manage.py migrate --noinput
-
+```sh
+sudo docker-compose exec backend python manage.py collectstatic --noinput
+sudo docker-compose exec backend python manage.py makemigrations --noinput
+sudo docker-compose exec backend python manage.py migrate --noinput
+```
 ## загрузить стандартный набор тегов и ингредиентов:
-##### sudo docker-compose exec backend python manage.py load_ing
-##### sudo docker-compose exec backend python manage.py load_tags
-
+```sh
+sudo docker-compose exec backend python manage.py load_ing
+sudo docker-compose exec backend python manage.py load_tags
+```
 ## посмотреть админку можно через этот логин:
 ##### http://84.201.177.196/
 ##### login: admin@ya.ru
