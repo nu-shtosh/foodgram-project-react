@@ -1,10 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-os.path.expanduser('~')
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
@@ -128,7 +123,7 @@ DJOSER = {
     },
 }
 
-AUTH_USER_MODEL = 'users.user'
+AUTH_USER_MODEL = 'users.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LANGUAGE_CODE = 'ru'
