@@ -6,7 +6,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
-
+# на сервере использую image: nushtosh/foodgram_back
   backend:
     build:
       context: ../backend
@@ -18,7 +18,7 @@ services:
       - db
     env_file:
       - ./.env
-
+# на сервере использую image: nushtosh/foodgram_front
   frontend:
     build:
       context: ../frontend
