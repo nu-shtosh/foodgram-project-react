@@ -1,44 +1,44 @@
 ### Foodgram, «Продуктовый помощник».
 
-### В этом сервисе можно:
-создавать рецепты,
-добавлять рецепты в избранное,
-добавлять рецепты в список покупок, а потом скачивать их,
-подписываться на авторов рецептов.
+## В этом сервисе можно:
+# создавать рецепты,
+# добавлять рецепты в избранное,
+# добавлять рецепты в список покупок, а потом скачивать их,
+# подписываться на авторов рецептов.
 
-### Что бы поставить этот проект у себя на серевере надо:
+## Что бы поставить этот проект у себя на серевере надо:
 
-### скопировать этот проект на свой компьютер:
-git clone https://github.com/nu-shtosh/foodgram-project-react.git
-не забудь создать .env
+## скопировать этот проект на свой компьютер:
+# git clone https://github.com/nu-shtosh/foodgram-project-react.git
+# не забудь создать .env
 
-### войти на свой сервер скопировать docker-compose, nginx, .env:
-scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
-scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
-scp .env <username>@<host>:/home/<username>/.env
+## войти на свой сервер скопировать docker-compose, nginx, .env:
+# scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
+# scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
+# scp .env <username>@<host>:/home/<username>/.env
 
-### установать docker: 
-sudo apt install docker.io 
+## установать docker: 
+# sudo apt install docker.io 
 
-### уствновить docker-compose:
-sudo apt install docker-compose
+## уствновить docker-compose:
+# sudo apt install docker-compose
 
-### собрать контейнер:
-sudo docker-compose up -d --build
+## собрать контейнер:
+# sudo docker-compose up -d --build
 
-### собрать статику и сделать миграции:
-sudo docker-compose exec backend python manage.py collectstatic --noinput
-sudo docker-compose exec backend python manage.py makemigrations --noinput
-sudo docker-compose exec backend python manage.py migrate --noinput
+## собрать статику и сделать миграции:
+# sudo docker-compose exec backend python manage.py collectstatic --noinput
+# sudo docker-compose exec backend python manage.py makemigrations --noinput
+# sudo docker-compose exec backend python manage.py migrate --noinput
 
-### загрузить стандартный набор тегов и ингредиентов:
-sudo docker-compose exec backend python manage.py load_ing
-sudo docker-compose exec backend python manage.py load_tags
+## загрузить стандартный набор тегов и ингредиентов:
+# sudo docker-compose exec backend python manage.py load_ing
+# sudo docker-compose exec backend python manage.py load_tags
 
-### посмотреть админку можно через этот логин:
-http://84.201.177.196/
-login: admin@ya.ru
-password: admin
+## посмотреть админку можно через этот логин:
+# http://84.201.177.196/
+# login: admin@ya.ru
+# password: admin
 
 
 ![Python](https://camo.githubusercontent.com/a1b2dac5667822ee0d98ae6d799da61987fd1658dfeb4d2ca6e3c99b1535ebd8/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d3336373041303f7374796c653d666f722d7468652d6261646765266c6f676f3d707974686f6e266c6f676f436f6c6f723d666664643534)
